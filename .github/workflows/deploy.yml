@@ -1,0 +1,37 @@
+name: Deploy development to AWS
+on:
+  push
+env:
+  AWS_REGION : ${{secrets.AWS_REGION}}
+
+permissions:
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Get Python version
+        run: python -V
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: ${{secrets.ROLE_ARN}}
+          role-session-name: ReadOnlyRole
+          aws-region: ${{env.AWS_REGION}}
+      - run: aws sts get-caller-identity
+      - name: Install aws cdk
+        run: pip install aws-cdk-lib aws_cdk.constructs aws-cdk.core
+      - name: Install aws cdk cli
+        run: npm install -g aws-cdk
+      - name:  deploy
+        working-directory: ./CfnDevEnv
+        run: |
+          cdk synth

@@ -1,0 +1,36 @@
+name: PyPi Build
+on:
+  push
+
+permissions:
+  id-token: write
+
+jobs:
+  PyPiBuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Get Python version
+        run: python -V
+      - name: Install setupup tools
+        run: pip install --user --upgrade setuptools wheel twine 
+      - name:  Create tar.gz files and whl files
+        run: |
+          python ./setup.py sdist bdist_wheel
+      - name: Archive Upload files
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: dist/
+      - name: Upload test pypi
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python -m twine upload --skip-existing dist/*
