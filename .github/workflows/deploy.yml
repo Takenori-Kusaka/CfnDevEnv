@@ -28,7 +28,9 @@ jobs:
           aws-region: ${{env.AWS_REGION}}
       - run: aws sts get-caller-identity
       - name: Install aws cdk
-        run: pip install aws-cdk-lib aws_cdk.constructs aws-cdk.core
+        run: pip install aws-cdk-lib aws_cdk.constructs
+      - name: Install aws cdk core
+        run: pip install --upgrade  aws-cdk.core
       - name: Install aws cdk cli
         run: npm install -g aws-cdk
       - name:  deploy
